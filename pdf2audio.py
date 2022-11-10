@@ -14,12 +14,15 @@ except:
      
 pdfReader = PyPDF2.PdfFileReader(path)
 text=[]
-for i in range(pdfReader.getNumPages()):
-    try:
-        from_page = pdfReader.getPage(i)
-        text.append(from_page.extractText())
-    except:
-        pass
+try:
+    for i in range(pdfReader.getNumPages()):
+        try:
+            from_page = pdfReader.getPage(i)
+            text.append(from_page.extractText())
+        except:
+            pass
+except:
+    print("Number of pages error, please enter valid pdf!")
 try:
     text=" ".join(text)
     speech = gTTS(text=text, lang=language, slow=False)
