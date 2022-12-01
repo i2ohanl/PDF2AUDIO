@@ -57,7 +57,6 @@ app.layout = html.Div(
     style={"max-width": "500px"},
 )
 
-
 # (1)
 # Callback for app
 # Output to Ul element in app
@@ -83,9 +82,17 @@ def update_output(uploaded_filenames, uploaded_file_contents):
     files = uploaded_files()
     # (4) -> (5)
     # (5) -> (6)
+    error = 0
     if len(files)>0:
-        pdf2audio.audioconvert(files[0])
+        error = pdf2audio.audioconvert(files[0])
     
+    if error == -1:
+        return [html.Li("File too big, please try a smaller file")]
+    elif error == -2:
+        return [html.Li("The submitted file is not a pdf. Please upload a pdf file")]
+    elif error == -3:
+        return [html.Li("Miscellaneous error, try again later")]
+
     audio_files = converted_audios()
 
     if len(files) == 0:
@@ -93,7 +100,6 @@ def update_output(uploaded_filenames, uploaded_file_contents):
     else:
         return [html.Li(file_download_link(filename)) for filename in audio_files]
 
-# (3)
 # decode and save file in folder path (Editors note: no need to change)
 def save_file(name, content):
     # Decode fro bnary to utf-8
@@ -102,8 +108,7 @@ def save_file(name, content):
     with open(os.path.join(UPLOAD_DIRECTORY, name), "wb") as fp:
         fp.write(base64.decodebytes(data))
 
-# (5)
-# Create list of files in the directory and return it (Editors note: Not needed for project)
+# Create list of files in the directory and return it
 def uploaded_files():
     files = []
     for filename in os.listdir(UPLOAD_DIRECTORY):
@@ -112,6 +117,7 @@ def uploaded_files():
             files.append(filename)
     return files
 
+# Create list of audio files
 def converted_audios():
     files = []
     for filename in os.listdir(CONVERTED_DIRECTORY):
@@ -120,7 +126,7 @@ def converted_audios():
             files.append(filename)
     return files
 
-# To create a html link item to enable dowload (Editors note: Need to change paths according to project, else no change)
+# To create a html link item to enable dowload
 def file_download_link(filename):
     """Create a Plotly Dash 'A' element that downloads a file from the app."""
     location = "/download/{}".format(urlquote(filename))
